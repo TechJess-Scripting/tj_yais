@@ -9,9 +9,7 @@ exports.ox_target:addGlobalPlayer(
         onSelect = function(data)
             CarryTarget = GetPlayerServerId(NetworkGetPlayerIndexFromPed(data.entity))
 
-            CarryActive = true
-
-            if EmoteFunctions?.IsinAnim() then
+            if Config.stopemotes and EmoteFunctions?.IsinAnim() then
                 EmoteFunctions?.CancelEmote(true)
             end
             TriggerServerEvent("tj_yeis:triggerCarry", CarryTarget)
@@ -59,7 +57,7 @@ AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), func
 
         if targetPed == 0 then return end
 
-        if EmoteFunctions?.IsinAnim() then
+        if Config.stopemotes and EmoteFunctions?.IsinAnim() then
             EmoteFunctions?.CancelEmote(true)
         end
 
@@ -78,7 +76,7 @@ AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), func
             RemoveAnimDict(dict)
 
             while LocalPlayer.state.iscarried do
-                if not IsEntityPlayingAnim(playerPed, dict, anim, 3) then
+                if Config.stopemotes and not IsEntityPlayingAnim(playerPed, dict, anim, 3) then
                     TaskPlayAnim(playerPed, dict, anim, 8.0, -8.0, -1, 33, 0, false, false, false)
                 end
                 Wait(1000)

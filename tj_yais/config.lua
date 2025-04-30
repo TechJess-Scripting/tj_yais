@@ -1,11 +1,13 @@
 
-
-Framework = 'QB'
+Config = {}
+Config.Framework = 'QB'
 
 if GetResourceState('ex_extended') == 'started' then
-    Framework = 'ESX'
+    Config.Framework = 'ESX'
 elseif GetResourceState('qbx_core') == 'started' then
-    Framework = 'QBX'
+    Config.Framework = 'QBX'
 elseif GetResourceState('qb-core') == 'started' then
-    Framework = 'QB'
+    Config.Framework = 'QB'
 end
+
+Config.stopemotes = true -- stops players from emoting when they are being carried
