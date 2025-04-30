@@ -1,4 +1,4 @@
-local carrying, carried = {}, {}
+
 
 
 RegisterNetEvent('tj_yeis:triggerCarry', function(serverid)
@@ -10,16 +10,29 @@ RegisterNetEvent('tj_yeis:triggerCarry', function(serverid)
 
     local pedcoord = GetEntityCoords(GetPlayerPed(src))
     local targetcoord = GetEntityCoords(GetPlayerPed(serverid))
+    if #(pedcoord - targetcoord) > 3 then return end
 
-    local distance = #(pedcoord - targetcoord)
+
+    Player(src).state:Set('iscarrying', serverid)
+    Player(serverid).state:Set('iscarried', source)
+
+end)
 
 
-    if distance > 3 then return end
+RegisterNetEvent('tj_yais:server:stopCarry', function()
+    local src = source
 
-    if carried[source] then return end
+    local iscarryingid = Player(src).state.iscarrying
+    local iscarriedid = Player(src).state.iscarried
 
-    Player(src).state:Set('iscarrying', serverid, false)
-    Player(serverid).state:Set('iscarried', source, false)
+    if iscarryingid then
+        Player(src).state:Set('iscarrying', nil)
+        Player(iscarryingid).state:Set('iscarried', nil)
+    elseif iscarriedid then
+        Player(iscarriedid).state:Set('iscarrying', nil)
+        Player(src).state:Set('iscarried', nil)
 
-    TriggerClientEvent("tj_yeis:syncCarry", serverid, source)
+    end
+
+
 end)

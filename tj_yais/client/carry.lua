@@ -1,36 +1,3 @@
-
-CarryActive = false
-
-
-
-
-local OnCarry = function(dict,anim)
-    CreateThread(function()
-
-
-        RequestAnimDict(dict)
-        while not HasAnimDictLoaded(dict) do
-            Citizen.Wait(5)
-        end
-
-        TaskPlayAnim(PlayerPedId(), dict, anim, 4.0, 4.0, -1, 49, 0.0, false, false, false)
-        RemoveAnimDict(dict)
-
-
-        local playerPed = PlayerPedId()
-
-        while CarryActive == true do
-            if not IsEntityPlayingAnim(playerPed, dict, anim, 3) then
-                TaskPlayAnim(PlayerPedId(), dict, anim, 4.0, 4.0, -1, 49, 0.0, false, false, false)
-            end
-            Wait(1000)
-        end
-    end)
-
-end
-
-
-
 exports.ox_target:addGlobalPlayer(
     {
         label = "Carry over shoulder",
@@ -49,51 +16,100 @@ exports.ox_target:addGlobalPlayer(
             end
             TriggerServerEvent("tj_yeis:triggerCarry", CarryTarget)
 
-            OnCarry("missfinale_c2mcs_1", 'fin_c2_mcs_1_camman')
-
         end
     }
 )
 
 
-RegisterNetEvent('rpemotes:addon:syncCarry', function(targetId)
 
-    local targetPed = GetPlayerPed(GetPlayerFromServerId(targetId))
-    if targetPed == 0 then return end
-
-    if EmoteFunctions?.IsinAnim() then
-        EmoteFunctions?.CancelEmote(true)
-    end
-
-
+AddStateBagChangeHandler('iscarrying', ('player:%s'):format(cache.serverId), function(_, _, value)
     CreateThread(function()
+        local dict, anim =  "missfinale_c2mcs_1", 'fin_c2_mcs_1_camman'
         local playerPed = PlayerPedId()
 
-        RequestAnimDict("nm")
-        while not HasAnimDictLoaded("nm") do
+        RequestAnimDict(dict)
+        while not HasAnimDictLoaded(dict) do
             Citizen.Wait(5)
         end
 
-        AttachEntityToEntity(PlayerPedId(), targetPed, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
+        TaskPlayAnim(playerPed, dict, anim, 4.0, 4.0, -1, 49, 0.0, false, false, false)
+        RemoveAnimDict(dict)
 
-        TaskPlayAnim(playerPed, 'nm', 'firemans_carry', 8.0, -8.0, -1, 33, 0, false, false, false)
-        RemoveAnimDict('nm')
 
-        while CarryActive == true do
-            if not IsEntityPlayingAnim(playerPed, 'nm', 'firemans_carry', 3) then
-                TaskPlayAnim(playerPed, 'nm', 'firemans_carry', 8.0, -8.0, -1, 33, 0, false, false, false)
+        
+
+        while LocalPlayer.state.iscarrying do
+            if not IsEntityPlayingAnim(playerPed, dict, anim, 3) then
+                TaskPlayAnim(playerPed, dict, anim, 4.0, 4.0, -1, 49, 0.0, false, false, false)
             end
             Wait(1000)
         end
     end)
 
-    CreateThread(function()
-        while CarryActive do
-            DisableControlAction(0, 25, true)
-            DisablePlayerFiring(cache.playerId, true)
-            Wait(0)
-        end
-    end)
-
 end)
 
+
+AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), function(_, _, value)
+
+    if value then
+
+        local targetPed = GetPlayerPed(GetPlayerFromServerId(value))
+
+        local dict, anim = 'nm', 'firemans_carry'
+
+        if targetPed == 0 then return end
+
+        if EmoteFunctions?.IsinAnim() then
+            EmoteFunctions?.CancelEmote(true)
+        end
+
+
+        CreateThread(function()
+            local playerPed = PlayerPedId()
+
+            RequestAnimDict(dict)
+            while not HasAnimDictLoaded("nm") do
+                Citizen.Wait(5)
+            end
+
+            AttachEntityToEntity(PlayerPedId(), targetPed, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
+
+            TaskPlayAnim(playerPed, dict, anim, 8.0, -8.0, -1, 33, 0, false, false, false)
+            RemoveAnimDict(dict)
+
+            while LocalPlayer.state.iscarried do
+                if not IsEntityPlayingAnim(playerPed, dict, anim, 3) then
+                    TaskPlayAnim(playerPed, dict, anim, 8.0, -8.0, -1, 33, 0, false, false, false)
+                end
+                Wait(1000)
+            end
+        end)
+
+        CreateThread(function()
+            while LocalPlayer.state.iscarried do
+                DisableControlAction(0, 25, true)
+                DisablePlayerFiring(cache.playerId, true)
+                Wait(0)
+            end
+        end)
+
+    else
+        local playerPed = PlayerPedId()
+
+        ClearPedSecondaryTask(playerPed)
+        DetachEntity(playerPed, true,false)
+    
+    end
+end)
+
+RegisterCommand('cancel_carry_emote', function()
+
+    if LocalPlayer.state.iscarried or LocalPlayer.state.iscarrying then
+        TriggerServerEvent('tj_yais:server:stopCarry')
+    end
+
+end, false)
+
+if Config.PointingKeybindEnabled then
+    RegisterKeyMapping("cancel_carry_emote", 'Cancel CanPedHearPlayer', "keyboard", 'X')
+end
