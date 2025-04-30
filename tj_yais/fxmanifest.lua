@@ -6,7 +6,7 @@ description "Yet Another Interaction Script"
 author "TechJess#0"
 version "0.1"
 
-client_scripts {client_scripts {"client/*.lua", "client/**/*.lua"}}
+client_scripts {"client/*.lua", "client/**/*.lua"}
 
 server_scripts {"server/*.lua"}
 
