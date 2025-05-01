@@ -121,7 +121,9 @@ AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), func
         CreateThread(function()
             while LocalPlayer.state.iscarried do
                 DisableControlAction(0, 25, true)
+                DisableControlAction(0, 23, true)
                 DisablePlayerFiring(cache.playerId, true)
+
                 Wait(0)
             end
         end)
