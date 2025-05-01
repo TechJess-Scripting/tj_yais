@@ -32,8 +32,8 @@ end)
 StopCarry = function(source)
     local src = source
 
-    local iscarryingid = Player(src).state.iscarrying.id
-    local iscarriedid = Player(src).state.iscarried.id
+    local iscarryingid = Player(src).state.iscarrying?.id
+    local iscarriedid = Player(src).state.iscarried?.id
 
     if iscarryingid then
         Player(src).state:set('iscarrying', nil, true)
