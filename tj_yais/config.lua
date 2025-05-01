@@ -1,4 +1,3 @@
-
 Config = {}
 Config.Framework = 'QB'
 
@@ -15,11 +14,26 @@ Config.stopemotes = true -- stops players from emoting when they are being carri
 
 Config.emotes = {
     shoulder = {
-        carrying = {dict = "missfinale_c2mcs_1",anim = 'fin_c2_mcs_1_camman'},
-        carried = {dict = 'nm',anim = 'firemans_carry'}
+        carrying = { dict = "missfinale_c2mcs_1", anim = 'fin_c2_mcs_1_camman' },
+        carried = { dict = 'nm', anim = 'firemans_carry' },
+        attach = {
+            bone = 0,
+            placement = {
+                vec3(0.27, 0.15, 0.63),
+                vec3(0.5, 0.5, 180)
+            }
+        }
     },
     back = {
-        carrying = {dict = "anim@heists@box_carry@",anim = 'idle'},
-        carried = {dict = 'amb@code_human_in_car_idles@generic@ps@base',anim = 'base'}
+        carrying = { dict = "mx@piggypack_a", anim = 'mxclip_a' },
+        carried = { dict = 'mx@piggypack_b', anim = 'mxanim_b' },
+
+        attach = {
+            bone = 0,
+            placement = {
+                vec3(0.02, -0.439900, 0.42),
+                vec3(0.0, 0.0, 0.0),
+            }
+        }
     }
 }

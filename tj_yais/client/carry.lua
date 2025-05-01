@@ -14,7 +14,11 @@ exports.ox_target:addGlobalPlayer(
             end
             TriggerServerEvent("tj_yeis:triggerCarry", CarryTarget, 'shoulder')
         end
-    },
+    }
+)
+
+exports.ox_target:addGlobalPlayer(
+
     {
         label = "Carry on back",
         icon = 'fa-solid fa-hands',
@@ -32,7 +36,6 @@ exports.ox_target:addGlobalPlayer(
         end
     }
 )
-
 
 
 AddEventHandler('onResourceStop', function(resourceName)
@@ -81,7 +84,10 @@ end)
 AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), function(_, _, value)
     if value then
         local targetPed = GetPlayerPed(GetPlayerFromServerId(value.id))
-        local dict, anim = Config.emotes[value.type].carrying.dict, Config.emotes[value.type].carrying.anim
+        local extra = Config.emotes[value.type].carried
+        local attachdata = Config.emotes[value.type].attach
+        
+        
 
         if targetPed == 0 then return end
 
@@ -93,20 +99,20 @@ AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), func
         CreateThread(function()
             local playerPed = PlayerPedId()
 
-            RequestAnimDict(dict)
-            while not HasAnimDictLoaded(dict) do
+            RequestAnimDict(extra.dict)
+            while not HasAnimDictLoaded(extra.dict) do
                 Citizen.Wait(5)
             end
 
-            AttachEntityToEntity(PlayerPedId(), targetPed, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180, false, false, false, false,
+            AttachEntityToEntity(PlayerPedId(), targetPed, GetPedBoneIndex(targetPed, attachdata.bone), attachdata.placement[1], attachdata.placement[2], attachdata.placement[3], attachdata.placement[4], attachdata.placement[5], attachdata.placement[6], false, false, false, false,
                 2, false)
 
-            TaskPlayAnim(playerPed, dict, anim, 8.0, -8.0, -1, 33, 0, false, false, false)
-            RemoveAnimDict(dict)
+            TaskPlayAnim(playerPed, extra.dict, extra.anim, 8.0, -8.0, -1, 33, 0, false, false, false)
+            RemoveAnimDict(extra.dict)
 
             while LocalPlayer.state.iscarried do
-                if Config.stopemotes and not IsEntityPlayingAnim(playerPed, dict, anim, 3) then
-                    TaskPlayAnim(playerPed, dict, anim, 8.0, -8.0, -1, 33, 0, false, false, false)
+                if Config.stopemotes and not IsEntityPlayingAnim(playerPed, extra.dict, extra.anim, 3) then
+                    TaskPlayAnim(playerPed, extra.dict, extra.anim, 8.0, -8.0, -1, 33, 0, false, false, false)
                 end
                 Wait(1000)
             end
