@@ -2,7 +2,7 @@
 
 
 
-RegisterNetEvent('tj_yeis:triggerCarry', function(serverid)
+RegisterNetEvent('tj_yeis:triggerCarry', function(serverid, carrytype)
     local src = source
 
     if serverid == -1 or Player(src).state.iscarrying or Player(src).state.iscarried then
@@ -14,8 +14,8 @@ RegisterNetEvent('tj_yeis:triggerCarry', function(serverid)
     if #(pedcoord - targetcoord) > 3 then return end
 
 
-    Player(src).state:set('iscarrying', serverid, true)
-    Player(serverid).state:set('iscarried', source, true)
+    Player(src).state:set('iscarrying', {id = serverid, type = carrytype}, true)
+    Player(serverid).state:set('iscarried', {id = source, type = carrytype}, true)
 
 end)
 
@@ -32,8 +32,8 @@ end)
 StopCarry = function(source)
     local src = source
 
-    local iscarryingid = Player(src).state.iscarrying
-    local iscarriedid = Player(src).state.iscarried
+    local iscarryingid = Player(src).state.iscarrying.id
+    local iscarriedid = Player(src).state.iscarried.id
 
     if iscarryingid then
         Player(src).state:set('iscarrying', nil, true)

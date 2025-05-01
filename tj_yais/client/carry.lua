@@ -12,7 +12,23 @@ exports.ox_target:addGlobalPlayer(
             if Config.stopemotes and EmoteFunctions?.IsinAnim() then
                 EmoteFunctions?.CancelEmote(true)
             end
-            TriggerServerEvent("tj_yeis:triggerCarry", CarryTarget)
+            TriggerServerEvent("tj_yeis:triggerCarry", CarryTarget, 'shoulder')
+        end
+    },
+    {
+        label = "Carry on back",
+        icon = 'fa-solid fa-hands',
+        distance = 3,
+        canInteract = function(entity, distance, coords, name, bone)
+            return CarryCheck()
+        end,
+        onSelect = function(data)
+            CarryTarget = GetPlayerServerId(NetworkGetPlayerIndexFromPed(data.entity))
+
+            if Config.stopemotes and EmoteFunctions?.IsinAnim() then
+                EmoteFunctions?.CancelEmote(true)
+            end
+            TriggerServerEvent("tj_yeis:triggerCarry", CarryTarget, 'back')
         end
     }
 )
@@ -36,7 +52,7 @@ end)
 AddStateBagChangeHandler('iscarrying', ('player:%s'):format(cache.serverId), function(_, _, value)
     if value then
         CreateThread(function()
-            local dict, anim = "missfinale_c2mcs_1", 'fin_c2_mcs_1_camman'
+            local dict, anim = Config.emotes[value.type].carrying.dict, Config.emotes[value.type].carrying.anim
             local playerPed = PlayerPedId()
 
             RequestAnimDict(dict)
@@ -46,9 +62,6 @@ AddStateBagChangeHandler('iscarrying', ('player:%s'):format(cache.serverId), fun
 
             TaskPlayAnim(playerPed, dict, anim, 4.0, 4.0, -1, 49, 0.0, false, false, false)
             RemoveAnimDict(dict)
-
-
-
 
             while LocalPlayer.state.iscarrying do
                 if not IsEntityPlayingAnim(playerPed, dict, anim, 3) then
@@ -67,9 +80,8 @@ end)
 
 AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), function(_, _, value)
     if value then
-        local targetPed = GetPlayerPed(GetPlayerFromServerId(value))
-
-        local dict, anim = 'nm', 'firemans_carry'
+        local targetPed = GetPlayerPed(GetPlayerFromServerId(value.id))
+        local dict, anim = Config.emotes[value.type].carrying.dict, Config.emotes[value.type].carrying.anim
 
         if targetPed == 0 then return end
 
@@ -82,7 +94,7 @@ AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), func
             local playerPed = PlayerPedId()
 
             RequestAnimDict(dict)
-            while not HasAnimDictLoaded("nm") do
+            while not HasAnimDictLoaded(dict) do
                 Citizen.Wait(5)
             end
 
