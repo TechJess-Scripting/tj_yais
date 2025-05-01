@@ -1,6 +1,6 @@
 local ResourceName = 'qb-core'
 
-if Framework ~= 'QB' then return end
+if Config.Framework ~= 'QB' then return end
 if GetResourceState(ResourceName) ~= 'started' then return end
 
 local QBCore = exports[ResourceName]:GetCoreObject()
@@ -16,7 +16,6 @@ CarryCheck = function()
     or Player.ishandcuffed == true 
     or LocalPlayer.state.iscarrying
     or LocalPlayer.state.iscarried
-    or CarryActive 
     or IsPedInAnyVehicle(PlayerPedId(), false) then return false end
     return true
 

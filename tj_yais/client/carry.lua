@@ -2,7 +2,7 @@ exports.ox_target:addGlobalPlayer(
     {
         label = "Carry over shoulder",
         icon = 'fa-solid fa-hands',
-        distance = 4,
+        distance = 3,
         canInteract = function(entity, distance, coords, name, bone)
             return CarryCheck()
         end,
@@ -13,44 +13,60 @@ exports.ox_target:addGlobalPlayer(
                 EmoteFunctions?.CancelEmote(true)
             end
             TriggerServerEvent("tj_yeis:triggerCarry", CarryTarget)
-
         end
     }
 )
 
 
 
+AddEventHandler('onResourceStop', function(resourceName)
+    if (GetCurrentResourceName() ~= resourceName) then return end
+
+
+    if LocalPlayer.state.iscarrying then
+        LocalPlayer.state:set('iscarrying', nil, true)
+    end
+
+    if LocalPlayer.state.iscarried then
+        LocalPlayer.state:set('iscarried', nil, true)
+    end
+end)
+
+
 AddStateBagChangeHandler('iscarrying', ('player:%s'):format(cache.serverId), function(_, _, value)
-    CreateThread(function()
-        local dict, anim =  "missfinale_c2mcs_1", 'fin_c2_mcs_1_camman'
+    if value then
+        CreateThread(function()
+            local dict, anim = "missfinale_c2mcs_1", 'fin_c2_mcs_1_camman'
+            local playerPed = PlayerPedId()
+
+            RequestAnimDict(dict)
+            while not HasAnimDictLoaded(dict) do
+                Citizen.Wait(5)
+            end
+
+            TaskPlayAnim(playerPed, dict, anim, 4.0, 4.0, -1, 49, 0.0, false, false, false)
+            RemoveAnimDict(dict)
+
+
+
+
+            while LocalPlayer.state.iscarrying do
+                if not IsEntityPlayingAnim(playerPed, dict, anim, 3) then
+                    TaskPlayAnim(playerPed, dict, anim, 4.0, 4.0, -1, 49, 0.0, false, false, false)
+                end
+                Wait(1000)
+            end
+        end)
+    else
         local playerPed = PlayerPedId()
 
-        RequestAnimDict(dict)
-        while not HasAnimDictLoaded(dict) do
-            Citizen.Wait(5)
-        end
-
-        TaskPlayAnim(playerPed, dict, anim, 4.0, 4.0, -1, 49, 0.0, false, false, false)
-        RemoveAnimDict(dict)
-
-
-        
-
-        while LocalPlayer.state.iscarrying do
-            if not IsEntityPlayingAnim(playerPed, dict, anim, 3) then
-                TaskPlayAnim(playerPed, dict, anim, 4.0, 4.0, -1, 49, 0.0, false, false, false)
-            end
-            Wait(1000)
-        end
-    end)
-
+        ClearPedSecondaryTask(playerPed)
+    end
 end)
 
 
 AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), function(_, _, value)
-
     if value then
-
         local targetPed = GetPlayerPed(GetPlayerFromServerId(value))
 
         local dict, anim = 'nm', 'firemans_carry'
@@ -70,7 +86,8 @@ AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), func
                 Citizen.Wait(5)
             end
 
-            AttachEntityToEntity(PlayerPedId(), targetPed, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180, false, false, false, false, 2, false)
+            AttachEntityToEntity(PlayerPedId(), targetPed, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180, false, false, false, false,
+                2, false)
 
             TaskPlayAnim(playerPed, dict, anim, 8.0, -8.0, -1, 33, 0, false, false, false)
             RemoveAnimDict(dict)
@@ -90,24 +107,21 @@ AddStateBagChangeHandler('iscarried', ('player:%s'):format(cache.serverId), func
                 Wait(0)
             end
         end)
-
     else
         local playerPed = PlayerPedId()
 
         ClearPedSecondaryTask(playerPed)
-        DetachEntity(playerPed, true,false)
-    
+        DetachEntity(playerPed, true, false)
     end
 end)
 
-RegisterCommand('cancel_carry_emote', function()
 
+
+RegisterCommand('cancel_carry_emote', function()
     if LocalPlayer.state.iscarried or LocalPlayer.state.iscarrying then
         TriggerServerEvent('tj_yais:server:stopCarry')
     end
-
 end, false)
 
-if Config.PointingKeybindEnabled then
-    RegisterKeyMapping("cancel_carry_emote", 'Cancel CanPedHearPlayer', "keyboard", 'X')
-end
+
+RegisterKeyMapping("cancel_carry_emote", 'Cancel Carry', "keyboard", 'X')
